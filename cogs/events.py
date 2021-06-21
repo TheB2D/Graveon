@@ -63,6 +63,16 @@ class events(commands.Cog):
             embed.set_footer(text=version)
             await ctx.send(embed=embed)
             return
+        if isinstance(error, commands.CheckFailure):
+            embed = discord.Embed(
+                title="Command error",
+                description="The guild that you're in must be\ninitialized to be able to execute this command",
+                colour=discord.Colour.dark_red(),
+                timestamp=datetime.utcnow()
+            )
+            embed.set_footer(text=version)
+            await ctx.send(embed=embed)
+            return
         else:
             raise error
 

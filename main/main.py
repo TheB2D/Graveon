@@ -1,4 +1,4 @@
-import discord, json, os, sys
+import discord, json, os
 from functions import utils as ut
 from discord.ext import commands
 from datetime import datetime
@@ -34,6 +34,7 @@ client.load_extension("cogs.moderation")
 
 @client.command()
 @commands.has_permissions(administrator=True)
+@commands.guild_only()
 async def initialize(ctx, type=None):
     global serverData
     if type=="re":
@@ -51,6 +52,19 @@ async def initialize(ctx, type=None):
         )
         await ctx.message.add_reaction('✅')
         await ctx.send(embed=initializeMsg)
+        initializeDm = discord.Embed(
+            title="Initialize Setup",
+            description=f"""
+            **Server name**: {ctx.guild}
+            **Date initialized**: {datetime.utcnow()}
+            **Initialization by**: {ctx.author}
+            
+            Initializing your server enables you to unlock
+            more features that requires a database, such
+            as logging, verifications, configs, etc.
+            """
+        )
+        await ctx.author.send(embed=initializeDm)
     elif f"{ctx.guild}.json" in os.listdir("../serverFiles"):
         await ctx.message.add_reaction('❌')
         initializeMsg = discord.Embed(
@@ -61,6 +75,7 @@ async def initialize(ctx, type=None):
         )
         initializeMsg.set_footer(text=version)
         await ctx.send(embed=initializeMsg)
+
     else:
         initializeMsg= discord.Embed(
             title="Initialize Setup",
@@ -76,6 +91,20 @@ async def initialize(ctx, type=None):
         )
         await ctx.message.add_reaction('✅')
         await ctx.send(embed=initializeMsg)
+        initializeDm = discord.Embed(
+            title="Initialize Setup",
+            description=f"""
+            **Server name**: {ctx.guild}
+            **Date initialized**: {datetime.utcnow()}
+            **Initialization by**: {ctx.author}
+
+            Initializing your server enables you to unlock
+            more features that requires a database, such
+            as logging, verifications, configs, etc.
+            """
+        )
+        await ctx.author.send(embed=initializeDm)
+
 
 @client.command()
 async def quit(ctx):

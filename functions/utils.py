@@ -44,6 +44,9 @@ def isInitialized(server):
     elif f"{server}.json" not in os.listdir("../serverFiles"):
         return False
 
+async def is_initialized(ctx):
+    return isInitialized(ctx.guild)==True
+
 def openFile(guild):
     with open(f"../serverFiles/{guild}.json") as f:
         serverData = json.load(f)

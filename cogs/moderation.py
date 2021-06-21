@@ -8,17 +8,7 @@ with open("../config.json") as f:
     config = json.load(f)
 version = config["version"]
 
-class MemberID(commands.Converter):
-    async def convert(self, ctx, argument):
-        try:
-            m = await commands.MemberConverter().convert(ctx, argument)
-        except commands.BadArgument:
-            try:
-                return int(argument, base=10)
-            except ValueError:
-                raise commands.BadArgument(f"{argument} is not a valid member or member ID.") from None
-        else:
-            return m.id
+
 
 class moderation(commands.Cog):
     def __init__(self, client):
@@ -38,7 +28,6 @@ class moderation(commands.Cog):
                         colour=discord.Colour.orange(),
                         timestamp=datetime.utcnow()
                     )
-                    embed.set_thumbnail(url="http://www.clker.com/cliparts/H/Z/0/R/f/S/warning-icon-md.png")
                     embed.set_footer(text=version)
                     await message.channel.send(embed=embed)
                     embedDM = discord.Embed(
@@ -47,19 +36,18 @@ class moderation(commands.Cog):
                         colour=discord.Colour.orange(),
                         timestamp=datetime.utcnow()
                     )
-                    embedDM.set_thumbnail(url="http://www.clker.com/cliparts/H/Z/0/R/f/S/warning-icon-md.png")
                     embedDM.set_footer(text=version)
                     await message.author.send(embed=embedDM)
 
     @commands.command()
     @commands.has_permissions(administrator=True)
+    @commands.guild_only()
     async def kick(self, ctx, member: discord.Member, *, reason=None):
         embedDM = discord.Embed(
             title='Kick Notice',
             description=f'{ctx.author.name} kicked you in {ctx.guild}!\n**Reason:** {reason}'
         )
         embedDM.set_footer(text=version)
-        embedDM.set_thumbnail(url="https://image.freepik.com/free-icon/kick-boot_318-1645.jpg")
         await member.send(embed=embedDM)
         await member.kick(reason=reason)
         embed = discord.Embed(
@@ -69,11 +57,11 @@ class moderation(commands.Cog):
             timestamp=datetime.utcnow()
         )
         embed.set_footer(text=version)
-        embed.set_thumbnail(url="https://image.freepik.com/free-icon/kick-boot_318-1645.jpg")
         await ctx.send(embed=embed)
 
     @commands.command()
     @commands.has_permissions(administrator=True)
+    @commands.guild_only()
     async def ban(self, ctx, member: discord.Member, *, reason=None):
         embed = discord.Embed(
             title='Ban Notice',
@@ -95,6 +83,7 @@ class moderation(commands.Cog):
 
     @commands.command()
     @commands.has_permissions(administrator=True)
+    @commands.guild_only()
     async def unban(self, ctx, *, member):
         """ inefficient unban command, will change next commit"""
         banned_users = await ctx.guild.bans()
@@ -114,6 +103,7 @@ class moderation(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.command()
+    @commands.guild_only()
     async def mute(self, ctx, member: discord.Member):
         if discord.utils.get(ctx.guild.roles, name='Muted') not in ctx.guild.roles:
             await ctx.guild.create_role(name='Muted')
@@ -141,12 +131,15 @@ class moderation(commands.Cog):
 
     @commands.command()
     @commands.has_permissions(administrator=True)
+    @commands.guild_only()
     async def unmute(self, ctx, member: discord.Member):
         role = discord.utils.get(ctx.guild.roles, name="Muted")
         await member.remove_roles(role)
 
+    @commands.check(ut.is_initialized)
     @commands.command()
     @commands.has_permissions(administrator=True)
+    @commands.guild_only()
     async def warn(self, ctx, member: discord.Member, *, reason=None):
         if ut.isInitialized(ctx.guild) == True:
             serverData = ut.openFile(ctx.guild)  # sever properties

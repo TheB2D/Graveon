@@ -12,51 +12,51 @@ class verification(commands.Cog):
     def __init__(self, client):
         self.client = client
 
+    @commands.check(ut.is_initialized)
     @commands.command()
     async def verification(self, ctx, type, role : discord.Role=None):
-        if ut.isInitialized(ctx.guild) == True:
-            serverData = ut.openFile(ctx.guild)
-            if type == "set" or type=="re" and ctx.message.channel.id != serverData["verification"]["verificationChannelID"]:
-                await ctx.message.delete()
-                embed = discord.Embed(
-                    title="Verification captcha",
-                    description="React to the ✅ emoji bellow to receive\na verification captcha in your dms!\n\n**How to verify:**\nYou'll receive a dm with a captcha after\nreacting to this message retype the\ncaptcha here with: ``.verify <code>``",
-                    timestamp=datetime.utcnow()
-                )
-                embed.set_footer(text=version)
-                message = await ctx.send(embed=embed)
-                messageFetched = await ctx.channel.fetch_message(message.id)
-                await messageFetched.add_reaction('✅')
-                handler.setVerificationChannel(id=message.id, channelID=messageFetched.channel.id, guild=ctx.guild)
-            elif type == "set" and ctx.message.channel.id == serverData["verification"]["verificationChannelID"]:
-                embed = discord.Embed(
-                    title="Verification Set",
-                    description="There is already a verification captcha\nin this channel!",
-                    timestamp=datetime.utcnow(),
-                    colour=discord.Colour.orange()
-                )
-                embed.set_footer(text=version)
-                await ctx.send(embed=embed)
-            elif type == "role":
-                handler.setVerificationRole(role=role, guild=ctx.guild)
-                embed = discord.Embed(
-                    title="Verification Role Set",
-                    description=f"Verification role is now {role.mention}",
-                    timestamp=datetime.utcnow(),
-                    colour=discord.Colour.green()
-                )
-                embed.set_footer(text=version)
-                await ctx.send(embed=embed)
-            elif type is None:
-                embed = discord.Embed(
-                    title="Verification Error",
-                    description="Verification command not recognized!",
-                    timestamp=datetime.utcnow()
-                )
-                embed.set_footer(text=version)
-                await ctx.send(embed=embed)
+        serverData = ut.openFile(ctx.guild)
+        if type == "set" or type=="re" and ctx.message.channel.id != serverData["verification"]["verificationChannelID"]:
+            await ctx.message.delete()
+            embed = discord.Embed(
+                title="Verification captcha",
+                description="React to the ✅ emoji bellow to receive\na verification captcha in your dms!\n\n**How to verify:**\nYou'll receive a dm with a captcha after\nreacting to this message retype the\ncaptcha here with: ``.verify <code>``",
+                timestamp=datetime.utcnow()
+            )
+            embed.set_footer(text=version)
+            message = await ctx.send(embed=embed)
+            messageFetched = await ctx.channel.fetch_message(message.id)
+            await messageFetched.add_reaction('✅')
+            handler.setVerificationChannel(id=message.id, channelID=messageFetched.channel.id, guild=ctx.guild)
+        elif type == "set" and ctx.message.channel.id == serverData["verification"]["verificationChannelID"]:
+            embed = discord.Embed(
+                title="Verification Set",
+                description="There is already a verification captcha\nin this channel!",
+                timestamp=datetime.utcnow(),
+                colour=discord.Colour.orange()
+            )
+            embed.set_footer(text=version)
+            await ctx.send(embed=embed)
+        elif type == "role":
+            handler.setVerificationRole(role=role, guild=ctx.guild)
+            embed = discord.Embed(
+                title="Verification Role Set",
+                description=f"Verification role is now {role.mention}",
+                timestamp=datetime.utcnow(),
+                colour=discord.Colour.green()
+            )
+            embed.set_footer(text=version)
+            await ctx.send(embed=embed)
+        elif type is None:
+            embed = discord.Embed(
+                title="Verification Error",
+                description="Verification command not recognized!",
+                timestamp=datetime.utcnow()
+            )
+            embed.set_footer(text=version)
+            await ctx.send(embed=embed)
 
-
+    @commands.check(ut.is_initialized)
     @commands.command()
     async def verify(self, ctx, code=None):
         await ctx.message.delete()
