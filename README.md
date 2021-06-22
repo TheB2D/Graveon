@@ -16,4 +16,4 @@ Upcomming features of Graveon:
 * Advanced managing (polls, giveaways)
 * and many more
 
-Stay tuned for updates of the Graveon bot as this is in its developement stages.
+Stay tuned for updates of the Graveon bot as this it is in its developement stages.
