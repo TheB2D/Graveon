@@ -14,10 +14,9 @@ def initialize(serverName, dateInitialized, initializeAuthor):
                 "allowAppeal": False,
                 "appealChannel": None
             },
-            "ifReaches": {
-                "warn3": "Mute1hr",
-                "warn5": "Mute24hr"
-            },
+            "logMessages": False,
+            "logReactions": False,
+            "logGuild": False,
         },
         "RolePermissions": {
             "warnRoles": [],
@@ -33,7 +32,8 @@ def initialize(serverName, dateInitialized, initializeAuthor):
         },
         "verifiedUsers":[]
     }
-    open(f"../serverLogs/{serverName}.log", mode='a').close()
+    logFile = (str(serverName)).replace(" ", "")
+    open(f"../serverLogs/{logFile}.log", mode='a').close()
     with open(f'../serverFiles/{serverName}.json', 'w') as f:
         json.dump(serverData, f, indent=2)
 

@@ -9,35 +9,9 @@ with open("../config.json") as f:
 version = config["version"]
 
 
-
 class moderation(commands.Cog):
     def __init__(self, client):
         self.client = client
-
-    @commands.Cog.listener('on_message')
-    async def on_message(self, message):
-        if ut.isInitialized(message.guild) == True:
-            serverData = ut.openFile(message.guild)
-            for word in serverData["bannedWords"]:
-                if word in message.content.lower():
-                    fn.warn(member=message.author, server=message.guild)
-                    currentWarns = serverData["serverWarns"][str(message.author)]
-                    embed = discord.Embed(
-                        title="Warn Notice",
-                        description=f"**{message.author}** has been warned!\n**Reason:** Saying a banned word\n**Current Warns:** {currentWarns + 1}",
-                        colour=discord.Colour.orange(),
-                        timestamp=datetime.utcnow()
-                    )
-                    embed.set_footer(text=version)
-                    await message.channel.send(embed=embed)
-                    embedDM = discord.Embed(
-                        title="Warn Notice",
-                        description=f"You have been warned in **{message.guild}**\n**Reason:** Saying a banned word\n**Current Warns:** {currentWarns + 1}",
-                        colour=discord.Colour.orange(),
-                        timestamp=datetime.utcnow()
-                    )
-                    embedDM.set_footer(text=version)
-                    await message.author.send(embed=embedDM)
 
     @commands.command()
     @commands.has_permissions(administrator=True)
@@ -95,7 +69,7 @@ class moderation(commands.Cog):
                 await ctx.guild.unban(user)
         embed = discord.Embed(
             title='Unban Notice',
-            description=f'{member} has been banned!',
+            description=f'{member} has been unbanned!',
             colour=discord.Colour.green(),
             timestamp=datetime.utcnow()
         )

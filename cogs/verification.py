@@ -56,31 +56,34 @@ class verification(commands.Cog):
             embed.set_footer(text=version)
             await ctx.send(embed=embed)
 
-    @commands.check(ut.is_initialized)
     @commands.command()
     async def verify(self, ctx, code=None):
         await ctx.message.delete()
         with open(f"../functions/temporary/verificationBinds.json") as f:
             binds = json.load(f)
-        if isinstance(ctx.channel, discord.channel.DMChannel) == False:
-            if binds["verificationBinds"][f"{ctx.author}"][0] == code:
-                await ctx.author.send(f'✅ You are now verified in {binds["verificationBinds"][f"{ctx.author}"][1]}!')
-                role = discord.utils.get(ctx.guild.roles, name=f"{handler.retrieveVerifiedRole(ctx.guild)}")
-                await ctx.author.add_roles(role)
-                del binds["verificationBinds"][f"{ctx.author}"]
-            elif binds["verificationBinds"][f"{ctx.author}"][0]!= code:
-                await ctx.author.send("❌ **Verification failed**: Incorrect code! Try again.")
-            else:
-                await ctx.author.send("❌ **Verification error**: You don't have a CAPTCHA to solve!.")
-        elif isinstance(ctx.channel, discord.channel.DMChannel) == True:
+        if code == "reload":
             embed = discord.Embed(
-                title='Command error',
-                description=f'This command is only executable through\na guild!',
-                colour=discord.Colour.dark_red(),
-                timestamp=datetime.utcnow()
+                title="Verification Captcha",
+                description=f"Retype the text in the image below with the\ncommand: ``.verify <text in the image>``\nin {ctx.guild} to verify your identity.\n\nExecute ``.verify reload`` to reload captcha.\n\n**Note:** The text is case sensitive",
+                timestamp=datetime.utcnow(),
+                colour=discord.Colour.green()
             )
+            captchaText = handler.generateCaptcha()
+            handler.bindVerification(user=ctx.author, code=captchaText, guild=ctx.guild)
+            file = discord.File("captcha.png", filename="captcha.png")
             embed.set_footer(text=version)
-            await ctx.send(embed=embed)
+            embed.set_image(url="attachment://captcha.png")
+            await ctx.author.send(file=file, embed=embed)
+            return
+        elif binds["verificationBinds"][f"{ctx.author}"][0] == code:
+            await ctx.author.send(f'✅ You are now verified in {binds["verificationBinds"][f"{ctx.author}"][1]}!')
+            role = discord.utils.get(ctx.guild.roles, name=f"{handler.retrieveVerifiedRole(ctx.guild)}")
+            await ctx.author.add_roles(role)
+            del binds["verificationBinds"][f"{ctx.author}"] # TODO: this doesnt work for some reason
+        elif binds["verificationBinds"][f"{ctx.author}"][0]!= code:
+            await ctx.author.send("❌ **Verification failed**: Incorrect code! Try again.")
+        else:
+            await ctx.author.send("❌ **Verification error**: You don't have a CAPTCHA to solve!.")
         with open(f"../functions/temporary/verificationBinds.json", "w") as f:
                 json.dump(binds, f, indent=2)
 

@@ -1,5 +1,5 @@
 import discord, json, os
-from functions import utils as ut
+from functions import utils as ut, logger
 from discord.ext import commands
 from datetime import datetime
 
@@ -24,13 +24,11 @@ with open("../config.json") as f:
 
 version = config["version"]
 
-cogs = ["verification", "events"]
+cogs = ["verification", "events", "moderation", "configurations"]
 if __name__=='__main__':
     print(f"Discord bot running on {version}")
     for cog in cogs:
         client.load_extension(f"cogs.{cog}")
-
-client.load_extension("cogs.moderation")
 
 @client.command()
 @commands.has_permissions(administrator=True)
@@ -129,7 +127,8 @@ async def ping(ctx):
         title = 'Graveon',
         description = f'Current bot lantecy: {round(client.latency * 1000)}ms',
         colour = discord.Colour.blue(),
-        timestamp=datetime.utcnow()
+        timestamp=datetime.utcnow(),
+        url="https://github.com/TheB2D/Graveon"
     )
     embed.set_footer(text='Thank you using Graveon bot!')
     await ctx.send(embed=embed)
