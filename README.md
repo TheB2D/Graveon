@@ -1,4 +1,6 @@
 # Graveon
+**Update:** Official Graveon v1.0 is releasing this SATURDAY!!! (MY FIRST FINISHED PROJECT) Stay tuned, alots of new things!!!!!!!!!!
+
 A discord bot that makes managing a little eaiser. Current features of Graveon:
 * Moderation
 * Verifications using anti-bot captcha
