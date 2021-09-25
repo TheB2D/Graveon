@@ -1,3 +1,5 @@
+import asyncio
+
 from functions import utils as ut, verificationHandler as vh, moderationHandler as mod, logger
 from discord.ext import commands
 import discord, json
@@ -17,12 +19,12 @@ class events(commands.Cog):
         if message.author == self.client.user:
             return
         elif ctx.valid:  # auto mod that detects banned messages do not include message that invoke commands
-            logger.log(message, "execute") #logs event
+            logger.log(message, "execute") #logs user execute event
             return
         else:
             logger.log(message, "message") #logs message
         await self.client.process_commands(message)
-        if ut.isInitialized(message.guild) == True:
+        if ut.isInitialized(message.guild) == True: # chat filter
             serverData = ut.openFile(message.guild)
             if "family-friendly" in serverData["bannedWords"]:
                 with open("../serverFiles/defaultBadWords.json") as f:
@@ -32,7 +34,7 @@ class events(commands.Cog):
             for word in serverData["bannedWords"]:
                 if word in message.content.lower():
                     mod.warn(member=message.author, server=message.guild)
-                    if serverData["serverWarns"][str(message.author)] != True: # checks if author key exists, if not then it has no warns
+                    if str(message.author) not in serverData["serverWarns"]: # checks if author key exists, if not, then it has no warns
                         currentWarns = 0
                     else:
                         currentWarns = serverData["serverWarns"][str(message.author)]
@@ -53,10 +55,18 @@ class events(commands.Cog):
                     )
                     embedDM.set_footer(text=version)
                     await message.author.send(embed=embedDM)
+            if str(message.channel) in serverData["settings"]["disableLinks"]:
+                if "http://" in message.content.lower() or "https://" in message.content.lower():
+                    await message.delete()
+                    botMessage = await ctx.send(f"You can't send links here! {message.author.mention}")
+                    await asyncio.sleep(5)
+                    await botMessage.delete()
+
 
     @commands.Cog.listener()
     async def on_guild_channel_create(self, channel):
         """ sync permissions when a new channel is created """
+        logger.log(channel, "createChannel")
         role = discord.utils.get(channel.guild.roles, name="Muted")
         perms = discord.PermissionOverwrite(send_messages=False)
         await channel.set_permissions(role, overwrite=perms)
@@ -81,8 +91,7 @@ class events(commands.Cog):
             embed.set_footer(text=version)
             embed.set_image(url="attachment://captcha.png")
             await payload.member.send(file=file, embed=embed)
-        else:
-            pass
+
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):

@@ -17,6 +17,9 @@ def initialize(serverName, dateInitialized, initializeAuthor):
             "logMessages": False,
             "logReactions": False,
             "logGuild": False,
+            "disableLinks": [
+
+            ]
         },
         "RolePermissions": {
             "warnRoles": [],
@@ -30,10 +33,11 @@ def initialize(serverName, dateInitialized, initializeAuthor):
             "verificationID":None,
             "verificationRole":None
         },
-        "verifiedUsers":[]
+        "verifiedUsers":[],
+        "polls":{},
+        "progressed_polls":{}
     }
-    logFile = (str(serverName)).replace(" ", "")
-    open(f"../serverLogs/{logFile}.log", mode='a').close()
+    open(f"../serverLogs/{serverName}.log", mode='w').close()
     with open(f'../serverFiles/{serverName}.json', 'w') as f:
         json.dump(serverData, f, indent=2)
 

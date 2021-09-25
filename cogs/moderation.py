@@ -1,5 +1,5 @@
 from functions import moderationHandler as fn
-from functions import utils as ut
+from functions import utils
 from discord.ext import commands
 import discord, json
 from datetime import datetime
@@ -13,7 +13,7 @@ class moderation(commands.Cog):
     def __init__(self, client):
         self.client = client
 
-    @commands.command()
+    @commands.command(name='kick', description='**Kick people out of the guild', usage='[member] [OPTIONAL: reason]')
     @commands.has_permissions(administrator=True)
     @commands.guild_only()
     async def kick(self, ctx, member: discord.Member, *, reason=None):
@@ -33,7 +33,7 @@ class moderation(commands.Cog):
         embed.set_footer(text=version)
         await ctx.send(embed=embed)
 
-    @commands.command()
+    @commands.command(name='ban', description='**Ban people in the guild**', usage='[member] [OPTIONAL: reason]')
     @commands.has_permissions(administrator=True)
     @commands.guild_only()
     async def ban(self, ctx, member: discord.Member, *, reason=None):
@@ -55,7 +55,7 @@ class moderation(commands.Cog):
         embed.set_footer(text=version)
         await ctx.send(embed=embed)
 
-    @commands.command()
+    @commands.command(name='unban', description='**Unban people out of the guild**', usage='[member]')
     @commands.has_permissions(administrator=True)
     @commands.guild_only()
     async def unban(self, ctx, *, member):
@@ -76,7 +76,7 @@ class moderation(commands.Cog):
         embed.set_footer(text=version)
         await ctx.send(embed=embed)
 
-    @commands.command()
+    @commands.command(name='mute', description='**Remove a member\'s permission to speak**', usage='[member]')
     @commands.guild_only()
     async def mute(self, ctx, member: discord.Member):
         if discord.utils.get(ctx.guild.roles, name='Muted') not in ctx.guild.roles:
@@ -103,20 +103,21 @@ class moderation(commands.Cog):
         embedDM.set_footer(text=version)
         await member.send(embed=embedDM)
 
-    @commands.command()
+    @commands.command(name='unmute', description='**Return a member\'s permission to speak**', usage='[mumber]')
     @commands.has_permissions(administrator=True)
     @commands.guild_only()
     async def unmute(self, ctx, member: discord.Member):
         role = discord.utils.get(ctx.guild.roles, name="Muted")
         await member.remove_roles(role)
+        await ctx.send(embed=discord.Embed(title="Mute Notice", description=f"{member} has been unmuted by {ctx.author}", timestap=datetime.utcnow(), colour=discord.Colour.orange()).set_footer(text=version))
 
-    @commands.check(ut.is_initialized)
-    @commands.command()
+    @commands.check(utils.is_initialized)
+    @commands.command(name='warn', description='Warn a member', usage='[member] [OPTIONAL: reason]')
     @commands.has_permissions(administrator=True)
     @commands.guild_only()
     async def warn(self, ctx, member: discord.Member, *, reason=None):
-        if ut.isInitialized(ctx.guild) == True:
-            serverData = ut.openFile(ctx.guild)  # sever properties
+        if utils.isInitialized(ctx.guild) == True:
+            serverData = utils.openFile(ctx.guild)  # sever properties
             fn.warn(member=member, server=ctx.guild)  # warns the user
             embed = discord.Embed(
                 title="Warn Notice",
@@ -135,7 +136,7 @@ class moderation(commands.Cog):
             )
             embedDM.set_footer(text=version)
             await member.send(embed=embedDM)  # sends warning to dm
-        elif ut.isInitialized(ctx.guild) == False:
+        elif utils.isInitialized(ctx.guild) == False:
             embed = discord.Embed(
                 title="Initialization",
                 description=f"Initialize {ctx.guild} first before\nexecuting moderation commands!",
@@ -144,6 +145,11 @@ class moderation(commands.Cog):
             )
             embed.set_footer(text="do \".initialize\" to initialize")
             await ctx.send(embed=embed)
+
+    @commands.command(name='clear', description='**This command will clear messages**', usage='[amount of messages]')
+    async def clear(self, ctx, amount=1):
+        await ctx.channel.purge(limit=amount)
+        await ctx.send(embed=discord.Embed(title=f"✅ Successfully cleared {amount} messages!", color=discord.Colour.green()))
 
     @kick.error
     @ban.error

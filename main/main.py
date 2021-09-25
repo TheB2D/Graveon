@@ -24,13 +24,13 @@ with open("../config.json") as f:
 
 version = config["version"]
 
-cogs = ["verification", "events", "moderation", "configurations"]
+cogs = ["verification", "events", "moderation", "configurations", "pollMaker"]
 if __name__=='__main__':
     print(f"Discord bot running on {version}")
     for cog in cogs:
         client.load_extension(f"cogs.{cog}")
 
-@client.command()
+@client.command(name="initialize", description="Create a database for your server", usage="[action: re]")
 @commands.has_permissions(administrator=True)
 @commands.guild_only()
 async def initialize(ctx, type=None):
@@ -103,8 +103,8 @@ async def initialize(ctx, type=None):
         )
         await ctx.author.send(embed=initializeDm)
 
-
 @client.command()
+@commands.has_permissions(administrator=True)
 async def quit(ctx):
     embed = discord.Embed(
         title='Graveon',
@@ -132,5 +132,13 @@ async def ping(ctx):
     )
     embed.set_footer(text='Thank you using Graveon bot!')
     await ctx.send(embed=embed)
+
+class NewHelpName(commands.MinimalHelpCommand):
+    async def send_pages(self):
+        destination = self.get_destination()
+        for page in self.paginator.pages:
+            emby = discord.Embed(description=page)
+            await destination.send(embed=emby)
+client.help_command = NewHelpName()
 
 client.run(config["token"])

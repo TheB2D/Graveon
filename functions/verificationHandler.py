@@ -1,36 +1,37 @@
 import json
 import random
 import string
+from functions import utils
 from captcha.image import ImageCaptcha
 
 def setVerificationChannel(id, channelID, guild) -> None:
-    with open(f"../serverFiles/{guild}.json") as f:
-        serverData = json.load(f)
+    serverData = utils.openFile(guild)
     serverData["verification"]["verificationChannelID"] = channelID
     serverData["verification"]["verificationID"] = id
     with open(f'../serverFiles/{guild}.json', 'w') as f:
         json.dump(serverData, f, indent=2)
     return
 
-def bindVerification(user, code, guild) -> bool:
-    with open(f"../functions/temporary/verificationBinds.json") as f:
-        serverData = json.load(f)
-    serverData["verificationBinds"][f"{user}"]=[code, str(guild)]
-    with open(f"../functions/temporary/verificationBinds.json", 'w') as f:
-        json.dump(serverData, f, indent=2)
+def bindVerification(user, code, guild=None) -> bool:
+    with open("../functions/temporary/verificationBinds.json") as f:
+        cache = json.load(f)
+    if guild!=None:
+        cache["verificationBinds"][f"{user}"]=[code, str(guild)]
+    else:
+        cache["verificationBinds"][f"{user}"][0]=code
+    with open("../functions/temporary/verificationBinds.json", 'w') as f:
+        json.dump(cache, f, indent=2)
     return True
 
 def setVerificationRole(role, guild) -> bool:
-    with open(f"../serverFiles/{guild}.json") as f:
-        serverData = json.load(f)
+    serverData = utils.openFile(guild)
     serverData["verification"]["verificationRole"]=str(role)
     with open(f"../serverFiles/{guild}.json", 'w') as f:
         json.dump(serverData, f, indent=2)
     return True
 
 def retrieveVerifiedRole(guild):
-    with open(f"../serverFiles/{guild}.json") as f:
-        serverData = json.load(f)
+    serverData = utils.openFile(guild)
     return str(serverData["verification"]["verificationRole"])
 
 def getRandomLength(length):

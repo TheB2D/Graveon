@@ -8,15 +8,17 @@ with open("../config.json") as f:
     config = json.load(f)
 version = config["version"]
 
+# TODO: if someone has the verified role and tries to verify again, it will not work
+
 class verification(commands.Cog):
     def __init__(self, client):
         self.client = client
-
+        
     @commands.check(ut.is_initialized)
-    @commands.command()
-    async def verification(self, ctx, type, role : discord.Role=None):
+    @commands.command(description="**This command will setup a captcha for new members**", usage="[action: set, reset, role] [OPTIONAL: @role]")
+    async def verifier(self, ctx, type, role : discord.Role=None):
         serverData = ut.openFile(ctx.guild)
-        if type == "set" or type=="re" and ctx.message.channel.id != serverData["verification"]["verificationChannelID"]:
+        if type == "set" or type=="reset" and ctx.message.channel.id != serverData["verification"]["verificationChannelID"]:
             await ctx.message.delete()
             embed = discord.Embed(
                 title="Verification captcha",
@@ -56,32 +58,34 @@ class verification(commands.Cog):
             embed.set_footer(text=version)
             await ctx.send(embed=embed)
 
-    @commands.command()
+    @commands.command(name='verify', description='Verify a captcha using a code', usage='[code]')
     async def verify(self, ctx, code=None):
-        await ctx.message.delete()
         with open(f"../functions/temporary/verificationBinds.json") as f:
             binds = json.load(f)
         if code == "reload":
             embed = discord.Embed(
                 title="Verification Captcha",
-                description=f"Retype the text in the image below with the\ncommand: ``.verify <text in the image>``\nin {ctx.guild} to verify your identity.\n\nExecute ``.verify reload`` to reload captcha.\n\n**Note:** The text is case sensitive",
+                description=f"Retype the text in the image below with the\ncommand: ``.verify <text in the image>``\nin {binds['verificationBinds'][str(ctx.author)][1]} to verify your identity.\n\nExecute ``.verify reload`` to reload captcha.\n\n**Note:** The text is case sensitive",
                 timestamp=datetime.utcnow(),
                 colour=discord.Colour.green()
             )
             captchaText = handler.generateCaptcha()
-            handler.bindVerification(user=ctx.author, code=captchaText, guild=ctx.guild)
+            handler.bindVerification(user=ctx.author, code=captchaText)
             file = discord.File("captcha.png", filename="captcha.png")
             embed.set_footer(text=version)
             embed.set_image(url="attachment://captcha.png")
             await ctx.author.send(file=file, embed=embed)
             return
-        elif binds["verificationBinds"][f"{ctx.author}"][0] == code:
-            await ctx.author.send(f'✅ You are now verified in {binds["verificationBinds"][f"{ctx.author}"][1]}!')
-            role = discord.utils.get(ctx.guild.roles, name=f"{handler.retrieveVerifiedRole(ctx.guild)}")
-            await ctx.author.add_roles(role)
-            del binds["verificationBinds"][f"{ctx.author}"] # TODO: this doesnt work for some reason
-        elif binds["verificationBinds"][f"{ctx.author}"][0]!= code:
-            await ctx.author.send("❌ **Verification failed**: Incorrect code! Try again.")
+        elif ctx.guild is not None:
+            if binds["verificationBinds"][f"{ctx.author}"][0] == code:
+                await ctx.author.send(f'✅ You are now verified in {binds["verificationBinds"][f"{ctx.author}"][1]}!')
+                role = discord.utils.get(ctx.guild.roles, name=f"{handler.retrieveVerifiedRole(ctx.guild)}")
+                await ctx.author.add_roles(role)
+                del binds["verificationBinds"][f"{ctx.author}"]
+            elif binds["verificationBinds"][f"{ctx.author}"][0]!= code:
+                await ctx.author.send("❌ **Verification failed**: Incorrect code! Try again.")
+        elif ctx.guild is None:
+            await ctx.send("❌ You can only verify in a guild!")
         else:
             await ctx.author.send("❌ **Verification error**: You don't have a CAPTCHA to solve!.")
         with open(f"../functions/temporary/verificationBinds.json", "w") as f:

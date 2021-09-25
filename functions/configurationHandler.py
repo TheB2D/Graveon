@@ -72,11 +72,6 @@ def modify(guild, section, type, *, args) -> list:
             serverConfig["logReactions"] = False
             pass
 
-    elif section == "log":
-        if type == "dump":
-            response = [f"✅ Here is your latest log!", discord.Colour.dark_green()]
-
-
     elif section == "log_guild":
         if type == "true":
             serverConfig["logGuild"] = True
@@ -84,25 +79,45 @@ def modify(guild, section, type, *, args) -> list:
             serverConfig["logGuild"] = False
             pass
 
-
-
     with open(f'../serverFiles/{guild}.json', 'w') as f:
+        json.dump(serverConfig, f, indent=2)
+    return response
+
+def link_disable(ctx, type, args: discord.TextChannel):
+    with open(f"../serverFiles/{ctx.guild}.json") as f:
+        serverConfig = json.load(f)
+    if type == "add":
+        if args[0].name not in serverConfig["settings"]["disableLinks"]:
+            serverConfig["settings"]["disableLinks"].append(str(args[0].name))
+            response=[f"✅ links will no longer be sendable in #{args[0]}", discord.Colour.green()]
+        else:
+            response = ["❌ links in this channel is already disabled", discord.Colour.red()]
+    elif type == "remove":
+        if args[0].name in serverConfig["settings"]["disableLinks"]:
+            serverConfig["settings"]["disableLinks"].remove(str(args[0].name))
+            response = [f"✅ links will now be sendable in {args[0]}", discord.Colour.green()]
+        else:
+            response=["❌ links in this channel is already enabled", discord.Colour.red()]
+    else:
+        response = ["Uh oh. Something went wrong...", discord.Colour.orange()]
+    with open(f"../serverFiles/{ctx.guild}.json", "w") as f:
         json.dump(serverConfig, f, indent=2)
     return response
 
 def currentConfig(guild):
     with open(f"../serverFiles/{guild}.json") as f:
         serverConfig = json.load(f)
-    if not serverConfig['bannedWords']:
+    if len(serverConfig['bannedWords'])==0:
         bannedWords="No banned words"
     else:
         bannedWords=', '.join(serverConfig['bannedWords'])
     response=f"""
-    🚫`` Banned words:`` {bannedWords}
-    👨‍👩‍👦`` Family-friendly mode:`` {str(serverConfig['settings']['familyMode'])}
+    🚫`` Banned words: (banned_words)`` {bannedWords}
+    👨‍👩‍👦`` Family-friendly mode (family_mode):`` {str(serverConfig['settings']['familyMode'])}
     📝`` Logging:``
-    > ↳Messages: {serverConfig['settings']['logMessages']}
-    > ↳Reaction events: True
-    > ↳Guild modification events: True
+    > ↳Messages (log_messages): {serverConfig['settings']['logMessages']}
+    > ↳Reaction events (log_react): True
+    > ↳Guild modification events (log_guild): True
+    🚫``Disable link sending:``  {'No channels' if len(serverConfig['settings']['disableLinks']) == 0 else ", ".join(serverConfig['settings']['disableLinks'])}
     """
     return response
