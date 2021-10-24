@@ -6,6 +6,7 @@
 * Server managing
 * Poll Maker
 * Link disabler
+* Message logger (kinda works)
 
 New features and some bug fixes in v0.2:
 - Fixed bug where reloading CAPTCHAS will result in giving a “None” guild
