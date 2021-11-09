@@ -1,5 +1,9 @@
 # Graveon v0.2
 
+Update: I will no longer be maintaining this project. Discord.py api wrapper has came to a halt, alongside with this project. It has been fun working on this!
+--------------
+
+
 **A discord bot that makes managing a little eaiser. Current features of Graveon:**
 * Moderation
 * Verifications using anti-bot captcha
