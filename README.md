@@ -1,7 +1,8 @@
 # Graveon v0.2
 
-Update: I will no longer be maintaining this project. Discord.py api wrapper has came to a halt, alongside with this project. It has been fun working on this!
---------------
+## Update: I will no longer be maintaining this project due to the cease of maintenance of the Discord.py api wrapper. It has been fun working on this!</br>
+### I will however be working on a much bigger project and COOLER with discord.js!
+---------------
 
 
 **A discord bot that makes managing a little eaiser. Current features of Graveon:**
